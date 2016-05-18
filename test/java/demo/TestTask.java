@@ -4,8 +4,7 @@ import org.apache.tools.ant.Task;
 
 /**
  * Empty task definition.
- * 
- * Does nothing at all.
+ *Does nothing at all.
  * 
   @ant.task name="feed" ignore="false" category="miracle"
   */
@@ -36,8 +35,8 @@ public class TestTask extends Task{
     /**
      * Number of loaves wanted.
      * 
-     * Minimum is 10, maximum i 100.
-     * @ant.not-required Default is 50.
+     * Minimum is 10, maximum i 100
+     * @ant.not-required Default is 50
      * @param loaves 
      */
     public void setLoaves(int loaves)
@@ -46,7 +45,7 @@ public class TestTask extends Task{
     }
 
     /**
-     * Number of loaves wanted
+     * Customer name
      * @ant.required
      * @param name
      */

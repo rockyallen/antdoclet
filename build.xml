@@ -215,6 +215,22 @@
                 <include name="style.css"/>
             </fileset>
         </copy>
+
+        <javadoc 
+            access="public" 
+            sourcepath="test/java" 
+            destdir="build/asciidoc"
+            docletpathref="docletpath"
+            packagenames="*" 
+            source="1.8">
+
+            <doclet name="com.neuroning.antdoclet.AntDoclet">
+                <param name="-templatesdir" value="${basedir}/templates/asciidoc"/>
+                <param name="-templates" value="main.vm"/>
+            </doclet>   
+
+        </javadoc>
+        
     </target>
 </project>
 
