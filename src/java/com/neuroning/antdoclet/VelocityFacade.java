@@ -59,7 +59,12 @@ public class VelocityFacade {
     {
       velocity = new VelocityEngine();
       velocity.setProperty("resource.loader", "file, class");
-      velocity.setProperty( "file.resource.loader.path", templatesDir != null ? ".,"+templatesDir : "."); // default "file" loader      
+      velocity.setProperty( "file.resource.loader.path", templatesDir != null ? ".,"+templatesDir : "."); // default "file" loader 
+      
+      // Previous version gave file permission errors on velocity.log. Cant fix it-just switch it off.
+      velocity.setProperty("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.NullLogSystem");
+      velocity.setProperty("runtime.log.logsystem.log4j.category", "velocity");
+      velocity.setProperty("runtime.log.logsystem.log4j.logger", "velocity");
       velocity.init();
      }
     
