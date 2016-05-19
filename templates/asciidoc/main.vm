@@ -17,7 +17,7 @@ AntDoclet - Running project $title
   #if ( ! $taskDoc.isIgnored() )
 
 - Processing $taskDoc.antName ##
-      $velocity.eval( "task.vm", "task.${taskDoc.getAntCategory()}.${taskDoc.getAntName()}.adoc" ) ##
+      $velocity.eval( "task.vm", "${taskDoc.getTaskOrType()}.${taskDoc.getAntCategory()}.${taskDoc.getAntName()}.adoc" ) ##
   #else ##
 - Ignoring $taskDoc.fullClassName()##
   #end ##
