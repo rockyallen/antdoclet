@@ -47,11 +47,11 @@ public class HTML2Latex extends HTMLEditorKit.ParserCallback {
      * Buffer containing the translated HTML.
      */
     StringBuffer ret;
-    Stack tblstk = new Stack();
+    Stack<TableInfo> tblstk = new Stack<TableInfo>();
     TableInfo tblinfo;
     int verbat = 0;
     int colIdx = 0;
-    Hashtable colors = new Hashtable(10);
+    Hashtable<String,String> colors = new Hashtable<String,String>(10);
     String block = "";
     String refurl = null;
     String doNotPrintURL = null;
@@ -232,8 +232,7 @@ public class HTML2Latex extends HTMLEditorKit.ParserCallback {
                 else {
                     if ("abcdefABCDEF0123456789".indexOf(col.charAt(0)) != -1) {
                         Color cc = new Color((int) Long.parseLong(col, 16));
-                        String name = (String) colors
-                                .get("color" + cc.getRGB());
+                        String name = colors.get("color" + cc.getRGB());
                         if (name == null) {
                             ret.append("\\definecolor{color" + colIdx
                                        + "}[rgb]{" + (cc.getRed() / 255.0)
@@ -331,7 +330,7 @@ public class HTML2Latex extends HTMLEditorKit.ParserCallback {
             ret.append("}");
         } else if (tag == HTML.Tag.TABLE) {
             ret = tblinfo.endTable();
-            tblinfo = (TableInfo) tblstk.pop();
+            tblinfo = tblstk.pop();
         } else if (tag == HTML.Tag.TH) {
             tblinfo.endCol();
         } else if (tag == HTML.Tag.TD) {

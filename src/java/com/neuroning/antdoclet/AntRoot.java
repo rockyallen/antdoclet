@@ -38,16 +38,18 @@ import com.sun.javadoc.RootDoc;
  */
 public class AntRoot {
 
-    private RootDoc rootDoc;
-    private SortedSet all, allTypes, allTasks;
-    private SortedSet categories;
+    private final RootDoc rootDoc;
+    private final SortedSet<AntDoc> all;
+    private final SortedSet<AntDoc> allTypes;
+    private final SortedSet<AntDoc> allTasks;
+    private final SortedSet<String> categories;
     
-    public AntRoot(RootDoc rootDoc) {
+    public AntRoot(RootDoc rootDoc) throws ClassNotFoundException {
         this.rootDoc = rootDoc;
-        all = new TreeSet();
-        allTypes = new TreeSet();
-        allTasks = new TreeSet();
-        categories = new TreeSet();
+        all = new TreeSet<AntDoc>();
+        allTypes = new TreeSet<AntDoc>();
+        allTasks = new TreeSet<AntDoc>();
+        categories = new TreeSet<String>();
         
         ClassDoc[] classes = rootDoc.classes();
         for(int i=0; i < classes.length; i++) {
@@ -66,22 +68,22 @@ public class AntRoot {
         }
     }
 
-    public Iterator getCategories()  {
+    public Iterator<String> getCategories()  {
         return categories.iterator();
     }
 
-    public Iterator getAll() {
+    public Iterator<AntDoc> getAll() {
         return all.iterator();
     }
-    public Iterator getTypes() {
+    public Iterator<AntDoc> getTypes() {
         return allTypes.iterator();
     }
 
-    public Iterator getTasks() {
+    public Iterator<AntDoc> getTasks() {
         return allTasks.iterator();
     }
     
-    public Iterator getAllByCategory(String category) {
+    public Iterator<AntDoc> getAllByCategory(String category) throws ClassNotFoundException {
         // give category "all" a special meaning:
         if("all".equals(category))
             return getAll();
@@ -89,7 +91,7 @@ public class AntRoot {
         return getByCategory(category, all);
     }
 
-    public Iterator getTypesByCategory(String category) {
+    public Iterator<AntDoc> getTypesByCategory(String category) throws ClassNotFoundException {
         // give category "all" a special meaning:
         if("all".equals(category))
             return getTypes();
@@ -97,7 +99,7 @@ public class AntRoot {
         return getByCategory(category, allTypes);
     }
 
-    public Iterator getTasksByCategory(String category) {
+    public Iterator<AntDoc> getTasksByCategory(String category) throws ClassNotFoundException {
         // give category "all" a special meaning:
         if("all".equals(category))
             return getTasks();
@@ -105,12 +107,12 @@ public class AntRoot {
         return getByCategory(category, allTasks);
     }
     
-    private Iterator getByCategory(String category, Set antdocs) {
-        List filtered = new ArrayList();
+    private Iterator<AntDoc> getByCategory(String category, Set<AntDoc> antdocs) throws ClassNotFoundException {
+        List<AntDoc> filtered = new ArrayList<AntDoc>();
         
-        Iterator it = antdocs.iterator();
+        Iterator<AntDoc> it = antdocs.iterator();
         while(it.hasNext()) {
-            AntDoc d = (AntDoc)it.next();
+            AntDoc d = it.next();
             if(category.equals(d.getAntCategory()))
                 filtered.add(d);
         }

@@ -43,11 +43,12 @@ public class AntDoclet extends com.sun.javadoc.Doclet {
      * Processes the JavaDoc documentation.
      * 
      * @param root The root of the documentation tree.
-     * @return True if processing was succesful.
+     * @return True if processing was successful.
      * @see com.sun.java.Doclet
      */
     public static boolean start(RootDoc root) {
 
+            try {
         // Get some options
         String title = "My Ant Tasks";
         String[] templates = null;
@@ -70,11 +71,11 @@ public class AntDoclet extends com.sun.javadoc.Doclet {
 
         // Init Velocity-template Generator
         VelocityFacade velocity = null;
-        try {
+//        try {
             velocity = new VelocityFacade(new File("."), templatesDir);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         // Set global parameters to the templates
         velocity.setAttribute("velocity", velocity);
@@ -82,15 +83,15 @@ public class AntDoclet extends com.sun.javadoc.Doclet {
         velocity.setAttribute("antroot", new AntRoot(root));
 
         for (int i = 0; i < templates.length; i++) {
-            try {
                 if (outputdirs.length > i)
                     velocity.setOutputDir(new File(outputdirs[i]));
                 velocity.eval(templates[i], new OutputStreamWriter(System.out));
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
-
+        catch (Exception e) {
+           e.printStackTrace();
+           return false;
+        }
         return true;
     }
 

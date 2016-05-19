@@ -37,6 +37,9 @@ import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.RootDoc;
 import com.sun.javadoc.Tag;
+import java.beans.IntrospectionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * An object of this class represents a Java class that is: an Ant Task, or an
@@ -45,11 +48,11 @@ import com.sun.javadoc.Tag;
  * It provides information about the Task/Type's attributes, nested elements and
  * more.
  * 
- * It's intented to be used for documenting Ant Tasks/Types
+ * It's intended to be used for documenting Ant Tasks/Types
  * 
  * @author Fernando Dobladez <dobladez@gmail.com>
  */
-public class AntDoc implements Comparable {
+public class AntDoc implements Comparable<AntDoc> {
 
     /**
      * An IntrospectionHelper (from Ant) to interpret ant-specific conventions
@@ -70,29 +73,29 @@ public class AntDoc implements Comparable {
     /**
      * The java Class for this type
      */
-    private Class clazz;
+    private final Class<Object> clazz;
 
     private AntDoc(IntrospectionHelper ih, RootDoc rootdoc, ClassDoc doc,
-            Class clazz) {
+            Class<Object> clazz) {
         this.doc = doc;
         this.rootdoc = rootdoc;
         this.introHelper = ih;
         this.clazz = clazz;
     }
 
-    public static AntDoc getInstance(String clazz) {
+    public static AntDoc getInstance(String clazz) throws ClassNotFoundException {
         return getInstance(clazz, null);
     }
 
-    public static AntDoc getInstance(Class clazz) {
+    public static AntDoc getInstance(Class<Object> clazz) {
         return getInstance(clazz, null);
     }
 
-    public static AntDoc getInstance(String clazz, RootDoc rootdoc) {
-        Class c = null;
+    public static AntDoc getInstance(String clazz, RootDoc rootdoc) throws ClassNotFoundException {
+        Class<Object> c = null;
 
         try {
-            c = Class.forName(clazz);
+            c = (Class<Object>)Class.forName(clazz);
         } catch (Throwable ee) {
             // try inner class (replacing last . for $)
             int lastdot = clazz.lastIndexOf(".");
@@ -103,20 +106,20 @@ public class AntDoc implements Comparable {
 
                 // System.out.println("trying inner:"+newName);
 
-                try {
-                    c = Class.forName(newName);
-                } catch (Throwable e) {
-                    System.err.println("WARNING: AntDoclet couldn't find '"
-                                       + clazz
-                                       + "'. Make sure it's in the CLASSPATH");
-                }
+//                try {
+                    c = (Class<Object>)Class.forName(newName);
+//                } catch (Throwable e) {
+//                    System.err.println("WARNING: AntDoclet couldn't find '"
+//                                       + clazz
+//                                       + "'. Make sure it's in the CLASSPATH");
+//                }
             }
         }
 
         return c != null ? getInstance(c, rootdoc) : null;
     }
 
-    public static AntDoc getInstance(Class clazz, RootDoc rootdoc) {
+    public static AntDoc getInstance(Class<Object> clazz, RootDoc rootdoc) {
         AntDoc d = null;
 
         IntrospectionHelper ih = IntrospectionHelper.getHelper(clazz);
@@ -195,12 +198,12 @@ public class AntDoc implements Comparable {
      * @return Collection of Ant attributes, excluding those inherited from
      *               org.apache.tools.ant.Task
      */
-    public Collection getAttributes() {
-        ArrayList attrs = Collections.list(introHelper.getAttributes());
+    public Collection<String> getAttributes() throws IntrospectionException {
+        ArrayList<String> attrs = Collections.list(introHelper.getAttributes());
 
         // filter out all attributes inherited from Task, since they are
         // common to all Ant Tasks and tend to confuse
-        try {
+//        try {
             BeanInfo beanInfo = Introspector.getBeanInfo(Task.class);
             PropertyDescriptor[] commonProps = beanInfo
                     .getPropertyDescriptors();
@@ -211,9 +214,9 @@ public class AntDoc implements Comparable {
                 attrs.remove(propName);
             }
 
-        } catch (Exception e) {
-            // ignore
-        }
+//        } catch (Exception e) {
+//            // ignore
+//        }
 
         return attrs;
     }
@@ -222,7 +225,7 @@ public class AntDoc implements Comparable {
      * 
      * @return a collection of the "Nested Elements" that this Ant tasks accepts
      */
-    public Enumeration getNestedElements() {
+    public Enumeration<String> getNestedElements() {
         return introHelper.getNestedElements();
     }
 
@@ -285,7 +288,7 @@ public class AntDoc implements Comparable {
      * @ant.type if it exists.
      * 
      */
-    public String getAntCategory() {
+    public String getAntCategory() throws ClassNotFoundException {
 
         String antCategory = Util.tagAttributeValue(this.doc, "ant.task",
                                                     "category");
@@ -312,14 +315,14 @@ public class AntDoc implements Comparable {
     }
 
     /**
-     * Return the name of this type from Ant's perpective
+     * Return the name of this type from Ant's perspective
      * 
      * @returns The value of the
      * @ant.task or
      * @ant.type if it exists. Otherwise, the Java class name.
      * 
      */
-    public String getAntName() {
+    public String getAntName() throws ClassNotFoundException {
         String antName = Util.tagAttributeValue(this.doc, "ant.task", "name");
         
         if (antName == null)
@@ -349,8 +352,8 @@ public class AntDoc implements Comparable {
      * @param elementName
      * @return The java type for the specified element accepted by this task
      */
-    public Class getElementType(String elementName) {
-        return introHelper.getElementType(elementName);
+    public Class<Object> getElementType(String elementName) {
+        return (Class<Object>)introHelper.getElementType(elementName);
     }
 
     /**
@@ -366,7 +369,7 @@ public class AntDoc implements Comparable {
      * for inner classes.
      * 
      */
-    public AntDoc getContainerDoc() {
+    public AntDoc getContainerDoc() throws ClassNotFoundException {
         if (!isInnerClass()) return null;
 
         return getInstance(this.doc.containingClass().qualifiedName(),
@@ -382,7 +385,7 @@ public class AntDoc implements Comparable {
      * Return the name of the type for the specified attribute
      */
     public String getAttributeType(String attributeName) {
-        return typeToString(introHelper.getAttributeType(attributeName));
+        return typeToString((Class<Object>)introHelper.getAttributeType(attributeName));
     }
 
     /**
@@ -454,7 +457,7 @@ public class AntDoc implements Comparable {
      * @param clazz
      * @return a string with the name for the given type
      */
-    private static String typeToString(Class clazz) {
+    private static String typeToString(Class<Object> clazz) {
         String fullName = clazz.getName();
 
         String name = fullName.lastIndexOf(".") >= 0 ? fullName
@@ -490,13 +493,17 @@ public class AntDoc implements Comparable {
 
     }
 
-    public int compareTo(Object o) {
-        AntDoc otherDoc = (AntDoc)o;
-        
-        String fullName1 = getAntCategory() +":" + getAntName();
-        String fullName2 = otherDoc.getAntCategory() +":"+ otherDoc.getAntName();
-        
-        return fullName1.compareTo(fullName2);
+    public int compareTo(AntDoc otherDoc) {
+            
+    int ret;            
+        try {
+            String fullName1 = getAntCategory() +":" + getAntName();
+            String fullName2 = otherDoc.getAntCategory() +":"+ otherDoc.getAntName();
+            ret= fullName1.compareTo(fullName2);
+        } catch (ClassNotFoundException ex) {
+            throw new RuntimeException(ex);
+        }
+        return ret;
     }
 
 }

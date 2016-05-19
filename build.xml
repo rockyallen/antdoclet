@@ -66,7 +66,7 @@
             destdir="${build.home}/classes" 
             debug="true" 
             deprecation="true">
-
+            <compilerarg value="-Xlint"/>
             <include name="**/*.java" />
             <classpath refid="compile.classpath" />
             <classpath path="${build.home}/classes" />
@@ -167,9 +167,9 @@
     </target>
 
     <!-- Test Target ===== -->
-   <target name="test">
+    <target name="test">
         
-       <delete dir="build/example"/>
+        <delete dir="build/example"/>
        
         <path id="docletpath">
             <fileset id="libs" dir="${lib.home}">
@@ -189,7 +189,7 @@
             includeantruntime="true"
             debug="true" 
             deprecation="true">
-
+            <compilerarg value="-Xlint"/>
             <include name="**/*.java" />
         </javac>
 
