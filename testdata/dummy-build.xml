@@ -1,0 +1,44 @@
+<project name="antdoclet" default="dist" basedir=".">
+
+    <description>
+        This is the main build script for AntDoclet, a tool to automatically
+        generate documentation for your custom [Ant](http://ant.apache.org)
+        Tasks.
+    </description>
+
+    <macrodef name="call-cc">
+        <attribute name="target"/>
+        <attribute name="link" default="executable"/>
+        <attribute name="target.dir" default="${build.bin.dir}"/>
+        <element name="cc-elements" implicit="yes"/>
+        <sequential>
+            <mkdir dir="${obj.dir}/@{target}"/>
+            <mkdir dir="@{target.dir}"/>
+            <cc link="@{link}" objdir="${obj.dir}/@{target}"
+                outfile="@{target.dir}/@{target}">
+                <compiler refid="compiler.options"/>
+                <cc-elements/>
+            </cc>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="testing">
+        <attribute name="v" default="NOT SET"/>
+        <element name="some-tasks" optional="yes"/>
+        <sequential>
+            <echo>v is @{v}</echo>
+            <some-tasks/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="full" description="Do one">
+        <attribute name="target" description="Round thing" default="small" />
+        <attribute name="link" description="Where it is going" />
+        <attribute name="target.dir" default="${build.bin.dir}"/>
+        <element name="cc-elements" implicit="yes"/>
+        <sequential>
+        </sequential>
+    </macrodef>
+
+</project>
+

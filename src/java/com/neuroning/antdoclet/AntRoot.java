@@ -1,20 +1,20 @@
 /**
  *  Copyright (c) 2003-2005 Fernando Dobladez
  *
- *  This file is part of AntDoclet.
+ *  This file is part of IAntDoclet.
  *
- *  AntDoclet is free software; you can redistribute it and/or modify
+ *  IAntDoclet is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
- *  AntDoclet is distributed in the hope that it will be useful,
+ *  IAntDoclet is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with AntDoclet; if not, write to the Free Software
+ *  along with IAntDoclet; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
@@ -25,10 +25,18 @@ import java.util.TreeSet;
 
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.RootDoc;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import javax.xml.xpath.XPathExpressionException;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
 
 /**
  * An object of this class represents a set of Java classes that are an Ant Task
@@ -42,14 +50,12 @@ import java.util.Set;
  */
 public class AntRoot {
 
-    //private final RootDoc rootDoc;
     private final SortedSet<AntDoc> all;
     private final SortedSet<AntDoc> allTypes;
     private final SortedSet<AntDoc> allTasks;
     private final SortedSet<String> categories;
 
     public AntRoot(RootDoc rootDoc) throws ClassNotFoundException, InstantiationException {
-        //this.rootDoc = Util.notNull(rootDoc, "rootDoc");
         all = new TreeSet<AntDoc>();
         allTypes = new TreeSet<AntDoc>();
         allTasks = new TreeSet<AntDoc>();
@@ -58,7 +64,7 @@ public class AntRoot {
         // ALL classes and interfaces
         ClassDoc[] classes = rootDoc.classes();
         for (ClassDoc classe : classes) {
-            AntDoc d = AntDoc.getInstance(classe.qualifiedName(), rootDoc);
+            AntDoc d = AntDocJavadocImp.getInstance(classe.qualifiedName(), rootDoc);
             if (d != null) {
                 all.add(d);
                 if (d.getAntCategory() != null) {
@@ -130,4 +136,25 @@ public class AntRoot {
 
         return filtered.iterator();
     }
+
+    /**
+     * Read macrodefs from f, convert them to IAntDocs and add them to the appropriate AntDoc lists.
+     *
+     * @param f
+     * @throws FileNotFoundException
+     */
+    public void augmentWithMacrodefs(File f) throws IOException, XPathExpressionException, ClassNotFoundException, InstantiationException {
+        if (!f.exists()) {
+            throw new FileNotFoundException(f.getAbsolutePath());
+        } else {
+            for (Node macrodef : XpathHelper.get("//macrodef", new InputSource(new FileReader(f)))) {
+                AntDoc ad = AntDocMacrodefImp.valueOf(macrodef);
+                all.add(ad);
+                allTasks.add(ad);
+                categories.add(ad.getAntCategory());
+                System.out.println("Added " + ad.toString());
+            }
+        }
+    }
+
 }

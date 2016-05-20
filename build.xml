@@ -205,6 +205,7 @@
                 <param name="-doctitle" value="${ant.project.name}"/>
                 <param name="-templatesdir" value="${basedir}/templates/example"/>
                 <param name="-templates" value="html/main.vm,latex/main.vm"/>
+                <param name="-macrodef" value="${basedir}/testdata/dummy-build.xml"/>
             </doclet>   
 
         </javadoc>
@@ -227,6 +228,7 @@
             <doclet name="com.neuroning.antdoclet.AntDoclet">
                 <param name="-templatesdir" value="${basedir}/templates/asciidoc"/>
                 <param name="-templates" value="main.vm"/>
+                <param name="-macrodef" value="${basedir}/testdata/dummy-build.xml"/>
             </doclet>   
 
         </javadoc>

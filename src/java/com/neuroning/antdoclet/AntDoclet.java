@@ -25,72 +25,83 @@ import java.io.OutputStreamWriter;
 
 import com.sun.javadoc.DocErrorReporter;
 import com.sun.javadoc.RootDoc;
+import java.util.Iterator;
 
 /**
  * AntDoclet Main class
- * 
+ *
  * This doclet generates documentation and other deliverables from the source
  * code of ant Tasks and Types.
- * 
+ *
  * It uses template-based generation to make it easy to create new deliverables
  * or modify the ones provided.
- * 
+ *
  * @author Fernando Dobladez <dobladez@gmail.com>
  */
 public class AntDoclet extends com.sun.javadoc.Doclet {
 
     /**
      * Processes the JavaDoc documentation.
-     * 
+     *
      * @param root The root of the documentation tree.
      * @return True if processing was successful.
      * @see com.sun.java.Doclet
      */
     public static boolean start(RootDoc root) {
 
-            try {
-        // Get some options
-        String title = "My Ant Tasks";
-        String[] templates = null;
-        String templatesDir = ".";
-        String[] outputdirs = new String[] { "."};
+        try {
+            // Get some options
+            String title = "My Ant Tasks";
+            String[] templates = null;
+            String templatesDir = ".";
+            String[] outputdirs = new String[]{"."};
+            String[] macrofiles = new String[]{};
 
-        String[][] options = root.options();
-        for (int opt = 0; opt < options.length; opt++) {
-            if (options[opt][0].equalsIgnoreCase("-doctitle")) {
-                title = options[opt][1];
-            } else if (options[opt][0].equalsIgnoreCase("-templates")) {
-                templates = options[opt][1].split(","); // comma-separated
-                                                        // filenames
-            } else if (options[opt][0].equalsIgnoreCase("-templatesdir")) {
-                templatesDir = options[opt][1]; // comma-separated filenames
-            } else if (options[opt][0].equalsIgnoreCase("-d")) {
-                outputdirs = options[opt][1].split(",");
+            String[][] options = root.options();
+            for (int opt = 0; opt < options.length; opt++) {
+                if (options[opt][0].equalsIgnoreCase("-doctitle")) {
+                    title = options[opt][1];
+                } else if (options[opt][0].equalsIgnoreCase("-templates")) {
+                    templates = options[opt][1].split(","); // comma-separated
+                    // filenames
+                } else if (options[opt][0].equalsIgnoreCase("-templatesdir")) {
+                    templatesDir = options[opt][1]; // comma-separated filenames
+                } else if (options[opt][0].equalsIgnoreCase("-d")) {
+                    outputdirs = options[opt][1].split(",");
+                } else if (options[opt][0].equalsIgnoreCase("-macrodef")) {
+                    macrofiles = options[opt][1].split(",");
+                }
             }
-        }
 
-        // Init Velocity-template Generator
-        VelocityFacade velocity = null;
-//        try {
+            // Init Velocity-template Generator
+            VelocityFacade velocity = null;
             velocity = new VelocityFacade(new File("."), templatesDir);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
 
-        // Set global parameters to the templates
-        velocity.setAttribute("velocity", velocity);
-        velocity.setAttribute("title", title);
-        velocity.setAttribute("antroot", new AntRoot(root));
+            // Set global parameters to the templates
+            velocity.setAttribute("velocity", velocity);
+            velocity.setAttribute("title", title);
+            AntRoot antroot = new AntRoot(root);
+            for (String filename : macrofiles) {
+                antroot.augmentWithMacrodefs(new File(filename));
+            }
+            
+            System.out.println("Content of all:");
+            Iterator<AntDoc> it = antroot.getAll();
+            while (it.hasNext())
+            {
+                System.out.println(it.next());
+            }
+            velocity.setAttribute("antroot", antroot);
 
-        for (int i = 0; i < templates.length; i++) {
-                if (outputdirs.length > i)
+            for (int i = 0; i < templates.length; i++) {
+                if (outputdirs.length > i) {
                     velocity.setOutputDir(new File(outputdirs[i]));
+                }
                 velocity.eval(templates[i], new OutputStreamWriter(System.out));
             }
-        }
-        catch (Exception e) {
-           e.printStackTrace();
-           return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
         return true;
     }
@@ -98,9 +109,8 @@ public class AntDoclet extends com.sun.javadoc.Doclet {
     /**
      * A JavaDoc option parsing handler. This one returns the number of
      * arguments required for the given option.
-     * 
-     * @param option
-     *            The name of the option.
+     *
+     * @param option The name of the option.
      * @return The number of arguments.
      * @see com.sun.java.Doclet
      */
@@ -109,16 +119,19 @@ public class AntDoclet extends com.sun.javadoc.Doclet {
         // arguments,
         // itself and the file name.
 
-        if (option.equalsIgnoreCase("-output"))
+        if (option.equalsIgnoreCase("-output")) {
             return 2;
-        else if (option.equalsIgnoreCase("-doctitle"))
+        } else if (option.equalsIgnoreCase("-doctitle")) {
             return 2;
-        else if (option.equalsIgnoreCase("-templates"))
+        } else if (option.equalsIgnoreCase("-templates")) {
             return 2;
-        else if (option.equalsIgnoreCase("-templatesdir"))
+        } else if (option.equalsIgnoreCase("-templatesdir")) {
             return 2;
-        else if (option.equalsIgnoreCase("-d"))
+        } else if (option.equalsIgnoreCase("-d")) {
             return 2;
+        } else if (option.equalsIgnoreCase("-macrodef")) {
+            return 2;
+        }
 
         return 0;
     }
@@ -126,11 +139,9 @@ public class AntDoclet extends com.sun.javadoc.Doclet {
     /**
      * A JavaDoc option parsing handler. This one checks the validity of the
      * options.
-     * 
-     * @param options
-     *            The two dimensional array of options.
-     * @param reporter
-     *            The error reporter.
+     *
+     * @param options The two dimensional array of options.
+     * @param reporter The error reporter.
      * @return True if the options are valid.
      * @see com.sun.java.Doclet
      */
@@ -139,6 +150,4 @@ public class AntDoclet extends com.sun.javadoc.Doclet {
         // TODO: do some actual validation of the arguments :)
         return true;
     }
-
-    
 }
