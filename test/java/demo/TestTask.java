@@ -31,7 +31,7 @@ public class TestTask extends Task {
     /**
      * Number of loaves wanted.
      *
-     * Minimum is 10, maximum i 100
+     * Minimum is 10, maximum is 100
      *
      * @ant.not-required Default is 50
      * @param loaves

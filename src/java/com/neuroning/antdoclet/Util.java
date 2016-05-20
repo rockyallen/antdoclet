@@ -93,4 +93,10 @@ public class Util {
         return str == null || str.length() <= 0;
       }
 
+    public static <T> T notNull(T t, String msg) {
+        if (t == null) {
+            throw new NullPointerException(msg);
+        }
+        return t;
+    }
 }
