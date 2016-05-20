@@ -71,6 +71,7 @@
 			<p>This Task accepts text in its element body.</p>
 #end
 
+                        
 #foreach ($element in $taskDoc.getNestedElements())
             
   #set($elementDoc = $taskDoc.getElementDoc($element))
@@ -136,7 +137,13 @@
 #end
 		</div>
     <br />
-	<hr />
+
+<h3>Nested types</h3>
+#foreach ($element in $taskDoc.getNestedTypes())
+<h4>&lt;$element&gt;</h4>
+$taskDoc.getDocForNestedType($element).commentText()
+#end
+<hr />
 
 	<div class="copyright"><em>Generated with <a href="http://antdoclet.neuroning.com">AntDoclet</a></em></div>
 

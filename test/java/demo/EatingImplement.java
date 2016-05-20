@@ -1,6 +1,8 @@
 package demo;
 
 /**
+ * Eg knife, fork, spoon
+ * 
  * @ant.type category="picnic"
  * 
  * @author rocky

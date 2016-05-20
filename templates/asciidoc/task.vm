@@ -33,7 +33,7 @@ $taskDoc.getComment()
 
 |====
 
-== Parameters accepted as nested elements
+== Nested elements
 
 #if ($taskDoc.isTaskContainer())
 This Task is a Container (it accepts nested Tasks).
@@ -84,3 +84,11 @@ $elementDoc.getComment()
 
 |====
 
+== Nested types (extension points)
+
+#foreach ($element in $taskDoc.getNestedTypes())
+=== <$element>
+
+$taskDoc.getDocForNestedType($element).commentText()
+
+#end
