@@ -166,8 +166,8 @@
 
     </target>
 
-    <!-- Test Target ===== -->
-    <target name="test">
+    <!-- Run Target ===== -->
+    <target name="run">
         
         <delete dir="build/example"/>
        
