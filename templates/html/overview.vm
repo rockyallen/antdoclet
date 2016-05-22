@@ -11,7 +11,7 @@
 <h1>$title - Reference Documentation</h1>
 
 <p>This is just an example "overview" page for you Ant Tasks documentation.</p>
-<p>In order to modify this content, edit the <code>templates/example/html/overview.vm</code> file.</p>
+<p>In order to modify this content, edit the <code>templates/html/overview.vm</code> file.</p>
 
 <h3>Requirements</h3>
 <p>You may want to clarify the version of Ant your Tasks depend on... Say: Ant 1.6.1 or newer, and it

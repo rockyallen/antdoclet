@@ -36,7 +36,7 @@ import org.xml.sax.InputSource;
  */
 public class AntDocMacrodefImpTest {
 
-    private static final String FULL
+    private static final String SAMPLE1
             = "<project name='test'>\n"
             + "    <macrodef name='full' description='Include all features'>\n"
             + "        <attribute name='target' description='Round thing' default='small' />\n"
@@ -51,29 +51,13 @@ public class AntDocMacrodefImpTest {
     public AntDocMacrodefImpTest() throws Exception {
     }
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
-
-    @Before
-    public void setUp() throws Exception {
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
-
-    /**
+     /**
      * Test of valueOf method, of class AntDocMacrodefImp.
      */
     @Test
     public void testValueOf() throws Exception {
         System.out.println("valueOf");
-        parse(FULL);
+        parse(SAMPLE1);
         assertNotNull("", ad);
     }
 
@@ -83,7 +67,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testGetAntCategory() throws Exception {
         System.out.println("getAntCategory");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("", "macrodef", ad.getAntCategory());
     }
 
@@ -93,7 +77,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testGetAntName() throws Exception {
         System.out.println("getAntName");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("", "full", ad.getAntName());
     }
 
@@ -103,7 +87,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testGetAttributeComment() throws Exception {
         System.out.println("getAttributeComment");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("Normal case", "Round thing", ad.getAttributeComment("target"));
         assertEquals("Normal case", "Where it is going", ad.getAttributeComment("link"));
         assertEquals("Not provided", "", ad.getAttributeComment("target.dir"));
@@ -114,7 +98,7 @@ public class AntDocMacrodefImpTest {
      */
     @Test
     public void testGetAttributeNotRequired() throws Exception {
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("target", "Default is small", ad.getAttributeNotRequired("target"));
         assertEquals("link", null, ad.getAttributeNotRequired("link"));
     }
@@ -125,7 +109,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testGetAttributeRequired() throws Exception {
         System.out.println("getAttributeRequired");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("target", null, ad.getAttributeRequired("target"));
         assertEquals("link", "", ad.getAttributeRequired("link"));
     }
@@ -136,8 +120,8 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testGetAttributeType() throws Exception {
         System.out.println("getAttributeType");
-        parse(FULL);
-        assertEquals("", "?", ad.getAttributeType("target"));
+        parse(SAMPLE1);
+        assertEquals("", "-", ad.getAttributeType("target"));
     }
 
     /**
@@ -146,7 +130,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testGetAttributes() throws Exception {
         System.out.println("getAttributes");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("",
                 new HashSet<String>(Arrays.asList(new String[]{"target", "link", "target.dir"})),
                 new HashSet<String>(ad.getAttributes()));
@@ -158,7 +142,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testGetComment() throws Exception {
         System.out.println("getComment");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("", "Include all features", ad.getComment());
     }
 
@@ -168,7 +152,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testGetFullClassName() throws Exception {
         System.out.println("getFullClassName");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("", "full", ad.getFullClassName());
     }
 
@@ -178,7 +162,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testGetNestedElements() throws Exception {
         System.out.println("getNestedElements");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("", false, ad.getNestedElements().hasMoreElements());
     }
 
@@ -188,7 +172,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testGetNestedTypes() throws Exception {
         System.out.println("getNestedTypes");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("", false, ad.getNestedTypes().hasNext());
     }
 
@@ -198,7 +182,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testGetShortComment() throws Exception {
         System.out.println("getShortComment");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("", "Include all features", ad.getShortComment());
     }
 
@@ -208,7 +192,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testGetTaskOrType() throws Exception {
         System.out.println("getTaskOrType");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("", "task", ad.getTaskOrType());
     }
 
@@ -218,7 +202,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testIsIgnored() throws Exception {
         System.out.println("isIgnored");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("", false, ad.isIgnored());
     }
 
@@ -228,7 +212,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testIsInnerClass() throws Exception {
         System.out.println("isInnerClass");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("", false, ad.isInnerClass());
     }
 
@@ -238,7 +222,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testIsTagged() throws Exception {
         System.out.println("isTagged");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("", true, ad.isTagged());
     }
 
@@ -248,7 +232,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testIsTask() throws Exception {
         System.out.println("isTask");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("", true, ad.isTask());
     }
 
@@ -258,7 +242,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testIsTaskContainer() throws Exception {
         System.out.println("isTaskContainer");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("", false, ad.isTaskContainer());
     }
 
@@ -268,7 +252,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testSourceIncluded() throws Exception {
         System.out.println("sourceIncluded");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("", false, ad.sourceIncluded());
     }
 
@@ -278,7 +262,7 @@ public class AntDocMacrodefImpTest {
     @Test
     public void testSupportsCharacters() throws Exception {
         System.out.println("supportsCharacters");
-        parse(FULL);
+        parse(SAMPLE1);
         assertEquals("", false, ad.supportsCharacters());
     }
 

@@ -14,5 +14,5 @@ AntDoclet - Running project $title
 ## Call the actual template
 
 #set( $html2latex = $velocity.create("com.neuroning.antdoclet.latex.HTML2Latex") )
-$velocity.eval( "latex/latex.vm", "anttasks-reference.tex" )
+$velocity.eval( "latex.vm", "anttasks-reference.tex" )
 

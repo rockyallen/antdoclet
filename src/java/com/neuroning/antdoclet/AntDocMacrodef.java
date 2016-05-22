@@ -176,9 +176,4 @@ public class AntDocMacrodef extends AntDoc {
     public boolean supportsCharacters() {
         return false;
     }
-
-    @Override
-    public int compareTo(AntDoc otherDoc) {
-        return toString().compareTo(otherDoc.toString());
-    }
 }
