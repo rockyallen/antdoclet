@@ -177,15 +177,15 @@
             </fileset>
             <pathelement path="build/antdoclet.jar" />
             <pathelement path="${ant.home}/lib/ant.jar" />
-            <pathelement location="build/testclasses" />
+            <pathelement location="build/democlasses" />
             <pathelement location="templates/apache" />
         </path>
 
-        <mkdir dir="build/testclasses"/>
+        <mkdir dir="build/democlasses"/>
 
         <javac 
-            srcdir="test/java" 
-            destdir="build/testclasses" 
+            srcdir="testdata/java" 
+            destdir="build/democlasses" 
             includeantruntime="true"
             debug="true" 
             deprecation="true">
@@ -195,10 +195,10 @@
 
         <javadoc 
             access="public" 
-            sourcepath="test/java" 
+            sourcepath="testdata/java" 
             destdir="build/example"
             docletpathref="docletpath"
-            packagenames="*" 
+            packagenames="demo.*" 
             source="1.8">
 
             <doclet name="com.neuroning.antdoclet.AntDoclet">
@@ -209,7 +209,7 @@
             </doclet>   
 
         </javadoc>
-        
+
         <copy todir="build/example">
             <fileset dir="${basedir}/templates/example/html">
                 <include name="index.html"/>
@@ -219,10 +219,10 @@
 
         <javadoc 
             access="public" 
-            sourcepath="test/java" 
+            sourcepath="testdata/java" 
             destdir="build/asciidoc"
             docletpathref="docletpath"
-            packagenames="*" 
+            packagenames="demo.*" 
             source="1.8">
 
             <doclet name="com.neuroning.antdoclet.AntDoclet">
@@ -232,7 +232,50 @@
             </doclet>   
 
         </javadoc>
-        
+
+    </target>
+    
+    <target name="test">
+        <mkdir dir="build/testclasses"/>
+        <mkdir dir="build/test"/>
+
+        <javac 
+            srcdir="test/java" 
+            destdir="build/testclasses" 
+            debug="true" 
+            deprecation="true"
+            includeantruntime="true">
+            <compilerarg value="-Xlint"/>
+            <include name="**/*.java" />
+            <classpath>
+                <pathelement path="build/antdoclet.jar"/>
+                <pathelement path="lib/junit-4.12.jar"/>
+            </classpath>
+        </javac>
+
+        <junit printsummary="yes" haltonfailure="no" dir="${basedir}">
+            <classpath>
+                <pathelement location="build/testclasses"/>
+                <pathelement path="build/antdoclet.jar"/>
+                <pathelement path="lib/junit-4.12.jar"/>
+                <pathelement path="lib/hamcrest-core-1.3.jar"/>
+            </classpath>
+
+            <formatter type="xml"/>
+
+            <batchtest fork="yes" todir="build/test">
+                <fileset dir="test/java">
+                    <include name="**/*Test*.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+
+        <junitreport todir="build/test">
+            <fileset dir="build/test">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="build/test/report"/>
+        </junitreport>    
     </target>
 </project>
 

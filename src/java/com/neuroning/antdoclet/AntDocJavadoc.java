@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2003-2005 Fernando Dobladez
+ *  Copyright (c) 2003-2016 Fernando Dobladez
  *
  *  This file is part of AntDoclet.
  *
@@ -32,14 +32,18 @@ import org.apache.tools.ant.Task;
 import org.apache.tools.ant.TaskContainer;
 import org.apache.tools.ant.types.EnumeratedAttribute;
 
+import com.sun.javadoc.Doc;
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.RootDoc;
 import com.sun.javadoc.Tag;
 import java.beans.IntrospectionException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.TreeSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * An object of this class represents a Java class that is: an Ant Task, or an
@@ -48,12 +52,25 @@ import java.util.TreeSet;
  * It provides information about the Task/Type's attributes, nested elements and
  * more.
  *
- * It's intended to be used for documenting Ant Tasks/Types
+ * It's intended to be used for documenting Ant Tasks/Types.
+ *
+ * Use the getAttribute methods to return either attributes or nested types.
+ * This works because it enforces attributes and nested types to have distinct
+ * names. (The name of a nested type is its parameter name in the addConfigured
+ * method).
  *
  * @author Fernando Dobladez dobladez@gmail.com
  */
-public class AntDocJavadocImp implements AntDoc {
+public class AntDocJavadoc extends AntDoc {
 
+    // types and attributes have the same data
+    private final Map<String, AttributeData> nestedTypesAndAttributes = new HashMap<String, AttributeData>();
+
+    // attributes only
+    private final Set<String> attributes = new HashSet<String>();
+
+    // types only
+    private final Set<String> nestedTypes = new HashSet<String>();
     /**
      * An IntrospectionHelper (from Ant) to interpret ant-specific conventions
      * from Tasks and Types
@@ -73,10 +90,10 @@ public class AntDocJavadocImp implements AntDoc {
     /**
      * The java Class for this type
      */
-    private final Class<Object> clazz;
+    private final Class<? extends Object> clazz;
 
-    private AntDocJavadocImp(IntrospectionHelper ih, RootDoc rootdoc, ClassDoc doc,
-            Class<Object> clazz) {
+    private AntDocJavadoc(IntrospectionHelper ih, RootDoc rootdoc, ClassDoc doc,
+            Class<? extends Object> clazz) {
         this.doc = Util.notNull(doc, "doc");
         this.rootdoc = Util.notNull(rootdoc, "rootdoc");
         this.introHelper = Util.notNull(ih, "ih");
@@ -91,14 +108,14 @@ public class AntDocJavadocImp implements AntDoc {
      * @return an AntDoc, if it is a documentable type, else null
      * @throws ClassNotFoundException
      */
-    public static AntDocJavadocImp getInstance(String clazz, RootDoc rootdoc) throws ClassNotFoundException, InstantiationException {
+    public static AntDocJavadoc getInstance(String clazz, RootDoc rootdoc) throws Exception, InstantiationException {
         Util.notNull(clazz, "clazz");
         Util.notNull(rootdoc, "rootdoc");
 
-        Class<Object> c = null;
+        Class<? extends Object> c = null;
 
         try {
-            c = (Class<Object>) Class.forName(clazz);
+            c = Class.forName(clazz);
         } catch (ClassNotFoundException ee) {
             // try inner class (replacing last . for $)
             int lastdot = clazz.lastIndexOf(".");
@@ -107,7 +124,7 @@ public class AntDocJavadocImp implements AntDoc {
                 clazz = clazz.substring(0, lastdot) + "$"
                         + clazz.substring(lastdot + 1);
             }
-            c = (Class<Object>) Class.forName(clazz);
+            c = Class.forName(clazz);
         }
         return getInstance(c, rootdoc);
     }
@@ -119,20 +136,94 @@ public class AntDocJavadocImp implements AntDoc {
      * @param rootdoc
      * @return Antdoc if is a class to document, else null.
      */
-    private static AntDocJavadocImp getInstance(Class<Object> clazz, RootDoc rootdoc) throws ClassNotFoundException, InstantiationException {
+    private static AntDocJavadoc getInstance(Class<? extends Object> clazz, RootDoc rootdoc) throws Exception, InstantiationException {
         Util.notNull(clazz, "clazz");
         Util.notNull(rootdoc, "rootdoc");
 
-        AntDocJavadocImp d = null;
+        AntDocJavadoc d = null;
 
         IntrospectionHelper ih = IntrospectionHelper.getHelper(clazz);
 
         ClassDoc doc = rootdoc.classNamed(clazz.getName());
+        Util.notNull(doc, "doc");
         // Filter out those types/tasks that are marked as "ignored"
         if (!isIgnored(doc)) {
-            d = new AntDocJavadocImp(ih, rootdoc, doc, clazz);
+            d = new AntDocJavadoc(ih, rootdoc, doc, clazz);
+
+            // parse attributes
+            for (String attributeName : getAttributes2(ih)) {
+                MethodDoc mm = getMethodFor(doc, attributeName);
+                if (Util.tagValue(mm, "ant.required") != null || Util.tagValue(mm, "ant.not-required") != null) {
+                    AttributeData att = new AttributeData();
+                    Tag[] firstTags = mm.firstSentenceTags();
+                    att.setShortDescription((firstTags.length > 0 && firstTags[0] != null) ? firstTags[0].text() : "???");
+                    att.setComment(mm.commentText());
+                    att.setName(attributeName);
+                    att.setType(typeToString(ih.getAttributeType(attributeName)));
+                    if (Util.tagValue(mm, "ant.required") != null) {
+                        att.setDefaultValue("NA");
+                        att.setRequired(true);
+                        att.setRequiredComment(null); // velocity treats this as false
+                    } else {
+                        att.setDefaultValue("");
+                        att.setRequired(false);
+                        att.setRequiredComment(Util.tagValue(mm, "ant.not-required"));
+                    }
+                    d.nestedTypesAndAttributes.put(attributeName, att);
+                    d.attributes.add(attributeName);
+                }
+            }
+        }
+
+        // parse nested types
+        for (Method m : ih.getExtensionPoints()) {
+            String nestedClassname = m.getParameters()[0].getType().getName();
+            MethodDoc mm = getMethodForNestedType(doc, nestedClassname);
+            if (Util.tagValue(mm, "ant.required") != null || Util.tagValue(mm, "ant.not-required") != null) {
+                String name = mm.parameters()[0].name();
+
+                if (d.nestedTypesAndAttributes.get(name) != null) {
+                    throw new IllegalArgumentException("Nested type has duplicate name '" + name + "' in method " + mm);
+                }
+                AttributeData att = new AttributeData();
+                att.setShortDescription(mm.commentText());
+                att.setComment(mm.commentText());
+                att.setName(name);
+                att.setType(nestedClassname);
+                if (Util.tagValue(mm, "ant.required") != null) {
+                    att.setDefaultValue(null);
+                    att.setRequired(true);
+                    att.setRequiredComment("???");
+                } else {
+                    att.setDefaultValue("");
+                    att.setRequired(false);
+                    att.setRequiredComment(Util.tagValue(mm, "ant.not-required"));
+                }
+                d.nestedTypesAndAttributes.put(name, att);
+                d.nestedTypes.add(name);
+            }
         }
         return d;
+    }
+
+    private static Collection<String> getAttributes2(IntrospectionHelper introHelper) throws IntrospectionException {
+        ArrayList<String> attrs = Collections.list(introHelper.getAttributes());
+
+        // filter out all attributes inherited from Task, since they are
+        // common to all Ant Tasks and tend to confuse
+        BeanInfo beanInfo = Introspector.getBeanInfo(Task.class);
+        PropertyDescriptor[] commonProps = beanInfo
+                .getPropertyDescriptors();
+
+        for (PropertyDescriptor commonProp : commonProps) {
+            String propName = commonProp.getName().toLowerCase();
+            if (attrs.contains(propName)) {
+                System.out.println("WARNING: Ignoring task property:" + propName);
+                attrs.remove(propName);
+            }
+        }
+
+        return attrs;
     }
 
     /**
@@ -170,7 +261,7 @@ public class AntDocJavadocImp implements AntDoc {
         return isIgnored(doc);
     }
 
-    private static boolean isIgnored(ClassDoc doc) {
+    private static boolean isIgnored(Doc doc) {
         return (Util.tagValue(doc, "ant.task") == null
                 && Util.tagValue(doc, "ant.type") == null)
                 || "true".equalsIgnoreCase(Util.tagAttributeValue(doc, "ant.task", "ignore"))
@@ -215,22 +306,9 @@ public class AntDocJavadocImp implements AntDoc {
      * org.apache.tools.ant.Task
      */
     @Override
-    public Collection<String> getAttributes() throws IntrospectionException {
-        ArrayList<String> attrs = Collections.list(introHelper.getAttributes());
+    public Collection<String> getAttributes() {
 
-        // filter out all attributes inherited from Task, since they are
-        // common to all Ant Tasks and tend to confuse
-        BeanInfo beanInfo = Introspector.getBeanInfo(Task.class);
-        PropertyDescriptor[] commonProps = beanInfo
-                .getPropertyDescriptors();
-
-        for (PropertyDescriptor commonProp : commonProps) {
-            String propName = commonProp.getName().toLowerCase();
-            // System.out.println("Ignoring task property:"+propName);
-            attrs.remove(propName);
-        }
-
-        return attrs;
+        return attributes;
     }
 
     /**
@@ -253,18 +331,7 @@ public class AntDocJavadocImp implements AntDoc {
      */
     @Override
     public Iterator<String> getNestedTypes() {
-
-        Collection<String> ret = new TreeSet<String>();
-        for (Method m : introHelper.getExtensionPoints()) {
-            ret.add(m.getParameters()[0].getType().getName());
-        }
-        return ret.iterator();
-    }
-
-    @Override
-    public ClassDoc getDocForNestedType(String typename) {
-
-        return rootdoc.classNamed(typename);
+        return nestedTypes.iterator();
     }
 
     @Override
@@ -292,8 +359,7 @@ public class AntDocJavadocImp implements AntDoc {
      */
     @Override
     public String getAttributeRequired(String attribute) {
-        MethodDoc method = getMethodFor(doc, attribute);
-        return method == null ? null : Util.tagValue(method, "ant.required");
+        return nestedTypesAndAttributes.get(attribute).getRequiredComment();
     }
 
     /**
@@ -307,8 +373,7 @@ public class AntDocJavadocImp implements AntDoc {
      */
     @Override
     public String getAttributeNotRequired(String attribute) {
-        MethodDoc method = getMethodFor(this.doc, attribute);
-        return method == null ? null : Util.tagValue(method, "ant.not-required");
+        return nestedTypesAndAttributes.get(attribute).getRequiredComment();
     }
 
     /**
@@ -318,7 +383,7 @@ public class AntDocJavadocImp implements AntDoc {
      * ant.type if it exists.
      */
     @Override
-    public String getAntCategory() throws ClassNotFoundException, InstantiationException {
+    public String getAntCategory() {
 
         String antCategory = Util.tagAttributeValue(this.doc, "ant.task",
                 "category");
@@ -355,7 +420,7 @@ public class AntDocJavadocImp implements AntDoc {
      *
      */
     @Override
-    public String getAntName() throws ClassNotFoundException, InstantiationException {
+    public String getAntName() {
         String antName = Util.tagAttributeValue(this.doc, "ant.task", "name");
 
         if (antName == null) {
@@ -381,45 +446,27 @@ public class AntDocJavadocImp implements AntDoc {
     }
 
     /**
-     *
-     * @see #getNestedElements()
-     * @param elementName
-     * @return The java type for the specified element accepted by this task
-     */
-    @Override
-    public Class<Object> getElementType(String elementName) {
-        Util.notNull(elementName, "elementName");
-        return (Class<Object>) introHelper.getElementType(elementName);
-    }
-
-    /**
-     * Return a new AntDoc for the given "element"
-     */
-    @Override
-    public AntDocJavadocImp getElementDoc(String elementName) throws ClassNotFoundException, InstantiationException {
-        Util.notNull(elementName, "elementName");
-        return getInstance(getElementType(elementName), rootdoc);
-    }
-
-    /**
      * Return a new AntDoc for the "container" of this type. Only makes sense
      * for inner classes.
      *
      */
-    @Override
-    public AntDocJavadocImp getContainerDoc() throws ClassNotFoundException, InstantiationException {
+    private AntDoc getContainerDoc() {
         if (!isInnerClass()) {
             return null;
         }
-        return getInstance(this.doc.containingClass().qualifiedName(), this.rootdoc);
+        try {
+            return getInstance(this.doc.containingClass().qualifiedName(), this.rootdoc);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     /**
      * Return the name of the type for the specified attribute
      */
     @Override
-    public String getAttributeType(String attributeName) throws InstantiationException {
-        return typeToString((Class<Object>) introHelper.getAttributeType(attributeName));
+    public String getAttributeType(String attributeName) {
+        return nestedTypesAndAttributes.get(attributeName).getType();
     }
 
     /**
@@ -430,12 +477,8 @@ public class AntDocJavadocImp implements AntDoc {
      * @return The comment for the specified attribute
      */
     @Override
-    public String getAttributeComment(String attribute) {
-        MethodDoc method = getMethodFor(this.doc, attribute);
-        if (method == null) {
-            return new String();
-        }
-        return method.commentText();
+    public String getAttributeComment(String attributeName) {
+        return nestedTypesAndAttributes.get(attributeName).getComment();
     }
 
     /**
@@ -449,9 +492,8 @@ public class AntDocJavadocImp implements AntDoc {
      * @return The MethodDoc for the given attribute or null if not found
      */
     private static MethodDoc getMethodFor(ClassDoc classDoc, String attribute) {
-        if (classDoc == null) {
-            return null;
-        }
+        Util.notNull(classDoc, "classDoc");
+        Util.notNull(attribute, "attribute");
         MethodDoc result = null;
         MethodDoc[] methods = classDoc.methods();
         for (int i = 0; i < methods.length; i++) {
@@ -468,8 +510,36 @@ public class AntDocJavadocImp implements AntDoc {
                 result = methods[i];
             }
         }
-        if (result == null) {
+        if (result == null && !(classDoc.superclass() == null)) {
             return getMethodFor(classDoc.superclass(), attribute);
+        }
+        return result;
+    }
+
+    /**
+     * Get the addConfigured(nestedClassname) method. Tries superclasses as
+     * well.
+     *
+     * @param classDoc
+     * @param nestedClassname
+     * @return The method - it should never be null.
+     */
+    private static MethodDoc getMethodForNestedType(ClassDoc classDoc, String nestedClassname) {
+        Util.notNull(classDoc, "classDoc");
+        Util.notNull(nestedClassname, "nestedClassname");
+        MethodDoc result = null;
+        for (MethodDoc m : classDoc.methods()) {
+            if (m.name().equalsIgnoreCase("addConfigured")) {
+                String paramClassName = m.parameters()[0].type().qualifiedTypeName();
+                if (nestedClassname.equals(paramClassName)) {
+                    result = m;
+                    break;
+                }
+            }
+        }
+
+        if (result == null && classDoc.superclass() != null) {
+            return getMethodForNestedType(classDoc.superclass(), nestedClassname);
         }
         return result;
     }
@@ -492,7 +562,7 @@ public class AntDocJavadocImp implements AntDoc {
      * @param clazz
      * @return a string with the name for the given type
      */
-    private static String typeToString(Class<Object> clazz) throws InstantiationException {
+    private static String typeToString(Class<? extends Object> clazz) {
         Util.notNull(clazz, "clazz");
         String fullName = clazz.getName();
 
@@ -518,6 +588,8 @@ public class AntDocJavadocImp implements AntDoc {
             } catch (java.lang.IllegalAccessException iae) {
                 // ignore, may a protected/private Enumeration
                 iae.printStackTrace();
+            } catch (InstantiationException ex) {
+                throw new RuntimeException(ex);
             }
         }
 
@@ -525,29 +597,7 @@ public class AntDocJavadocImp implements AntDoc {
     }
 
     @Override
-    public int compareTo(AntDoc otherDoc) {
-
-        int ret;
-        try {
-            String fullName1 = getAntCategory() + ":" + getAntName();
-            String fullName2 = otherDoc.getAntCategory() + ":" + otherDoc.getAntName();
-            ret = fullName1.compareTo(fullName2);
-        } catch (ClassNotFoundException ex) {
-            throw new RuntimeException(ex);
-        } catch (InstantiationException ex) {
-            throw new RuntimeException(ex);
-        }
-        return ret;
-    }
-
-    @Override
     public String toString() {
-        try {
-        return clazz.getName()+":"+getAntCategory() + ":" + getAntName();
-        } catch (ClassNotFoundException ex) {
-            throw new RuntimeException(ex);
-        } catch (InstantiationException ex) {
-            throw new RuntimeException(ex);
-        }
+        return "AntDocJavadoc={" + clazz.getName() + "," + getAntCategory() + "," + getAntName() + ",atts=" + attributes.size() + ",elements=" + "?" + "nestedTypes=" + nestedTypes.size();
     }
 }

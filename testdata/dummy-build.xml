@@ -31,11 +31,13 @@
         </sequential>
     </macrodef>
 
-    <macrodef name="full" description="Do one">
+    <macrodef name="full" description="Include all features">
+        <!-- with default hence not-required -->
         <attribute name="target" description="Round thing" default="small" />
+        <!-- required -->
         <attribute name="link" description="Where it is going" />
+        <!-- missing description -->
         <attribute name="target.dir" default="${build.bin.dir}"/>
-        <element name="cc-elements" implicit="yes"/>
         <sequential>
         </sequential>
     </macrodef>

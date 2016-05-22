@@ -1,7 +1,7 @@
 /**
- *  Copyright (c) 2003-2005 Fernando Dobladez
+ *  Copyright (c) 2003-2016 Fernando Dobladez
  *
- *  This file is part of IAntDoclet.
+ *  This file is part of AntDoclet.
  *
  *  IAntDoclet is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ import java.util.Set;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Collection;
 import javax.xml.xpath.XPathExpressionException;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
@@ -55,16 +56,20 @@ public class AntRoot {
     private final SortedSet<AntDoc> allTasks;
     private final SortedSet<String> categories;
 
-    public AntRoot(RootDoc rootDoc) throws ClassNotFoundException, InstantiationException {
+    public AntRoot()
+    {
         all = new TreeSet<AntDoc>();
         allTypes = new TreeSet<AntDoc>();
         allTasks = new TreeSet<AntDoc>();
         categories = new TreeSet<String>();
+    }
+
+        public void load(RootDoc rootDoc) throws Exception {
 
         // ALL classes and interfaces
         ClassDoc[] classes = rootDoc.classes();
         for (ClassDoc classe : classes) {
-            AntDoc d = AntDocJavadocImp.getInstance(classe.qualifiedName(), rootDoc);
+            AntDoc d = AntDocJavadoc.getInstance(classe.qualifiedName(), rootDoc);
             if (d != null) {
                 all.add(d);
                 if (d.getAntCategory() != null) {
@@ -88,6 +93,10 @@ public class AntRoot {
         return all.iterator();
     }
 
+    public Collection<AntDoc> getAllDocs() {
+        return all;
+    }
+
     public Iterator<AntDoc> getTypes() {
         return allTypes.iterator();
     }
@@ -96,7 +105,7 @@ public class AntRoot {
         return allTasks.iterator();
     }
 
-    public Iterator<AntDoc> getAllByCategory(String category) throws ClassNotFoundException, InstantiationException {
+    public Iterator<AntDoc> getAllByCategory(String category) throws Exception {
         // give category "all" a special meaning:
         if ("all".equals(category)) {
             return getAll();
@@ -105,7 +114,7 @@ public class AntRoot {
         return getByCategory(category, all);
     }
 
-    public Iterator<AntDoc> getTypesByCategory(String category) throws ClassNotFoundException, InstantiationException {
+    public Iterator<AntDoc> getTypesByCategory(String category) throws Exception {
         // give category "all" a special meaning:
         if ("all".equals(category)) {
             return getTypes();
@@ -114,7 +123,7 @@ public class AntRoot {
         return getByCategory(category, allTypes);
     }
 
-    public Iterator<AntDoc> getTasksByCategory(String category) throws ClassNotFoundException, InstantiationException {
+    public Iterator<AntDoc> getTasksByCategory(String category) throws Exception {
         // give category "all" a special meaning:
         if ("all".equals(category)) {
             return getTasks();
@@ -123,7 +132,7 @@ public class AntRoot {
         return getByCategory(category, allTasks);
     }
 
-    private Iterator<AntDoc> getByCategory(String category, Set<AntDoc> antdocs) throws ClassNotFoundException, InstantiationException {
+    private Iterator<AntDoc> getByCategory(String category, Set<AntDoc> antdocs) throws Exception {
         List<AntDoc> filtered = new ArrayList<AntDoc>();
 
         Iterator<AntDoc> it = antdocs.iterator();
@@ -138,23 +147,21 @@ public class AntRoot {
     }
 
     /**
-     * Read macrodefs from f, convert them to IAntDocs and add them to the appropriate AntDoc lists.
+     * Read macrodefs from f, convert them to AntDocs and add them to the appropriate AntDoc lists.
      *
      * @param f
      * @throws FileNotFoundException
      */
-    public void augmentWithMacrodefs(File f) throws IOException, XPathExpressionException, ClassNotFoundException, InstantiationException {
+    public void loadMacrodefs(File f) throws Exception {
         if (!f.exists()) {
             throw new FileNotFoundException(f.getAbsolutePath());
         } else {
             for (Node macrodef : XpathHelper.get("//macrodef", new InputSource(new FileReader(f)))) {
-                AntDoc ad = AntDocMacrodefImp.valueOf(macrodef);
+                AntDoc ad = AntDocMacrodef.valueOf(macrodef);
                 all.add(ad);
                 allTasks.add(ad);
                 categories.add(ad.getAntCategory());
-                System.out.println("Added " + ad.toString());
             }
         }
     }
-
 }

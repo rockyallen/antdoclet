@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2003-2005 Fernando Dobladez
+ *  Copyright (c) 2003-2016 Fernando Dobladez
  *
  *  This file is part of AntDoclet.
  *
@@ -80,17 +80,12 @@ public class AntDoclet extends com.sun.javadoc.Doclet {
             // Set global parameters to the templates
             velocity.setAttribute("velocity", velocity);
             velocity.setAttribute("title", title);
-            AntRoot antroot = new AntRoot(root);
+            AntRoot antroot = new AntRoot();
+            antroot.load(root);
             for (String filename : macrofiles) {
-                antroot.augmentWithMacrodefs(new File(filename));
+                antroot.loadMacrodefs(new File(filename));
             }
             
-            System.out.println("Content of all:");
-            Iterator<AntDoc> it = antroot.getAll();
-            while (it.hasNext())
-            {
-                System.out.println(it.next());
-            }
             velocity.setAttribute("antroot", antroot);
 
             for (int i = 0; i < templates.length; i++) {
