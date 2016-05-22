@@ -1,0 +1,96 @@
+##
+## This is a Velocity template for generating an HTML
+## document describing an Ant Task/Type 
+## 
+## Objects expected in context:
+##
+##     $taskDoc - Describes an Ant Task/Type (of type AntDoc)
+##
+## 
+
+[[$taskDoc.getFullClassName()]]
+
+= $taskDoc.getAntName()
+
+== Description
+
+$taskDoc.getComment()
+
+== Attributes
+
+|====
+
+|Attribute |Description |Type |Required
+#foreach ($attr in $taskDoc.attributes )
+
+|$attr
+|$taskDoc.getAttributeComment($attr)
+|$taskDoc.getAttributeType($attr)
+#if( $taskDoc.getAttributeRequired($attr) )
+|Yes
+#else
+|No, $taskDoc.getAttributeNotRequired($attr)
+#end
+#end
+
+|====
+
+== Nested elements
+
+#if ($taskDoc.isTaskContainer())
+This Task is a Container (it accepts nested Tasks).
+#end
+
+#if ($taskDoc.supportsCharacters())
+This Task accepts text in its element body.
+#end
+
+#foreach ($element in $taskDoc.getNestedElements())            
+#set($elementDoc = $taskDoc.getElementDoc($element))
+####
+#### Put a link for those types that are in this javadoc run
+#### and have nested elements (since nested-nested elements
+#### is the only info we are not showing for each nested element)
+####
+  #if( $elementDoc.sourceIncluded() && ($elementDoc.getNestedElements().hasMoreElements() || $elementDoc.isTagged()))
+link:${elementDoc.getFullClassName()}.html[$element]
+#else
+
+=== $element ### #if ( ! $elementDoc.sourceIncluded() ) (Of type ${elementDoc.getAntName()} )
+### #end
+#end
+#if($elementDoc.getComment())
+
+$elementDoc.getComment()
+#end
+
+|====
+
+|Attribute |Description |Type |Required
+#foreach ($elementAttr in $elementDoc.getAttributes())
+
+|$elementAttr
+|#if($elementDoc.getAttributeComment($elementAttr))$!elementDoc.getAttributeComment($elementAttr)            
+#end
+|$elementDoc.getAttributeType($elementAttr)
+#if($elementDoc.getAttributeRequired($elementAttr))
+|Yes
+#else
+|No, $elementDoc.getAttributeNotRequired($elementAttr)
+#end
+#end
+#end
+
+|====
+
+== Nested types (extension points)
+
+#foreach ($element in $taskDoc.getNestedTypes())
+=== $element
+Instance of <<$taskDoc.getAttributeType($element)>>
+
+Purpose: $taskDoc.getAttributeComment($element)
+Required? $taskDoc.getAttributeRequired($element) 
+Not required? $taskDoc.getAttributeNotRequired($element)
+
+#end
