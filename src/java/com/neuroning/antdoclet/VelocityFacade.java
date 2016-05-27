@@ -60,6 +60,7 @@ public class VelocityFacade {
       velocity = new VelocityEngine();
       velocity.setProperty("resource.loader", "file, class");
       velocity.setProperty( "file.resource.loader.path", templatesDir != null ? ".,"+templatesDir : "."); // default "file" loader      
+      velocity.setProperty("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.NullLogSystem");
       velocity.init();
      }
     

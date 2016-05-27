@@ -14,6 +14,12 @@
   <!-- Location of the templates you want to use: -->
   <property name="templates.dir" value="${basedir}/templates/example"/>
 
+  <property name="jver" value="1.6"/>
+
+  <property name="template" value="html/main.vm"/>
+
+  <property name="outdir" location="build/html"/>
+
 
 
 
@@ -44,28 +50,29 @@
     <mkdir  dir="${basedir}/output/latex"/>
 
 	<!-- First copy the "static" resources (images, static html files) -->
-	<copy todir="output/html/" overwrite="true">
+	<copy todir="${outdir}" overwrite="true">
 		<fileset dir="${templates.dir}/html/">
 			<exclude name="*.vm"/>
 		</fileset>
 	</copy>
+        <!--
 	<copy todir="output/latex/">
 		<fileset dir="${templates.dir}/latex/">
 			<exclude name="*.vm"/>
 		</fileset>
 	</copy>
-  	
+  	-->
 	<!-- Now invoke AntDoclet to generate the "dynamic" content from the templates -->
 	<javadoc access="public"
 		sourcepath="${source.dir}"
-                destdir="${basedir}/output/html,${basedir}/output/latex"
+                destdir="${outdir}"
                 packagenames="${package.names}"
-                docletpathref="doclet.classpath" source="1.4">
+                docletpathref="doclet.classpath" source="${jver}">
 
 		<doclet name="com.neuroning.antdoclet.AntDoclet">
 			<param name="-doctitle" value="${ant.project.name}" />
 			<param name="-templatesdir" value="${templates.dir}"/>
-			<param name="-templates" value="html/main.vm,latex/main.vm" />
+			<param name="-templates" value="${template}" />
 		</doclet>
 
 		<!-- For finer control, you may explicitly include/exclude

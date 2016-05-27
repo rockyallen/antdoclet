@@ -18,8 +18,7 @@ Tasks.
 	<property name="templates.home" value="templates" />
 
 	<property name="dist.name" value="antdoclet-1.1" />
-
-
+     
 	<!-- Compilation Classpath ===== -->
 	<path id="compile.classpath">
 		<fileset id="libs" dir="${lib.home}">
@@ -28,6 +27,8 @@ Tasks.
 		<fileset dir="${build.home}">
 			<include name="**/*.jar" />
 		</fileset>
+        	<fileset file="${ant.home}/lib/ant.jar" />
+        	<fileset file="${jdk.home}/lib/tools.jar" />
 	</path>
 
 
@@ -60,7 +61,7 @@ Tasks.
 	<!-- Build Target ===== -->
 	<target name="build" description="Compile all Java code" depends="init">
 
-		<javac srcdir="${src.home}" destdir="${build.home}/classes" debug="true" deprecation="true">
+		<javac srcdir="${src.home}" destdir="${build.home}/classes" debug="true" deprecation="true" includeantruntime="false">
 
 			<include name="**/*.java" />
 			<classpath refid="compile.classpath" />
@@ -160,6 +161,83 @@ Tasks.
 		</concat>
 
 	</target>
+
+        <target name="install" depends="dist" description="Run over Ant source">
+          <unzip src="${dist.target}.zip" dest="build/temp"/>
+        </target>
+
+        <target name="run1" description="Run over Ant source">
+
+          <ant dir="build/temp/${dist.name}" antfile="example.build.xml" target="build">
+            <property name="source.dir" location="${user.home}/apache-ant-1.6.0-src/src/main"/>
+            <property name="jars.dir" location="${user.home}/apache-ant-1.6.0-bin/lib"/>
+            <property name="jver" value="1.6"/>
+            <property name="template" value="html/main.vm"/>
+            <property name="outdir" location="build/apache-1.6"/>
+          </ant>
+          
+        </target>
+
+        <target name="run2" description="Run over latest Ant source">
+
+          <ant dir="build/temp/${dist.name}" antfile="example.build.xml" target="build">
+            <property name="source.dir" location="${user.home}/apache-ant-1.9.7/src/main"/>
+            <property name="jars.dir" location="${user.home}/apache-ant-1.9.7/lib"/>
+            <property name="jver" value="1.8"/>
+            <property name="template" value="html/main.vm"/>
+            <property name="outdir" location="build/apache-1.9.7"/>
+          </ant>
+        </target>
+        
+        <target name="run3" description="Run over sample source">
+          
+          <mkdir dir="build/testclasses"/>
+          
+          <javac includeantruntime="true" srcdir="testdata/java" destdir="build/testclasses"/>
+          
+          <jar jarfile="build/test/test.jar">
+            <fileset dir="build/testclasses"/>
+          </jar>
+            
+          <property name="package.names" value="demo.*"/>
+          <property name="source.dir" location="testdata/java"/>
+          <property name="jars.dir" location="build/test"/>
+          <property name="jver" value="1.8"/>
+          <property name="template" value="html/main.vm"/>
+          <property name="outdir" location="build/test-html"/>
+          <property name="templates.dir" location="build/temp/${dist.name}/templates/example"/>
+
+          <copy todir="${outdir}" overwrite="true">
+            <fileset dir="${templates.dir}/html/">
+              <exclude name="*.vm"/>
+            </fileset>
+          </copy>
+
+          <path id="doclet.classpath">
+
+          <fileset id="libs" dir="build/temp/${dist.name}/lib">
+            <include name="**/*.jar"/>
+          </fileset>
+
+          <fileset file="build/test/test.jar"/>
+          <fileset file="${ant.home}/lib/ant.jar"/>
+
+          </path>
+  
+          <javadoc access="public"
+              sourcepath="${source.dir}"
+              destdir="${outdir}"
+              packagenames="${package.names}"
+              docletpathref="doclet.classpath" 
+              source="${jver}">
+
+              <doclet name="com.neuroning.antdoclet.AntDoclet">
+                      <param name="-doctitle" value="${ant.project.name}" />
+                      <param name="-templatesdir" value="${templates.dir}"/>
+                      <param name="-templates" value="${template}" />
+              </doclet>
+      </javadoc>        
+    </target>
 
 </project>
 
