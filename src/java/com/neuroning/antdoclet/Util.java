@@ -49,7 +49,10 @@ public class Util {
      *
      */
     static String tagAttributeValue(Doc doc, String tag, String attr) {
-        String tagValue = tagValue(doc, tag);
+      notNull(doc,"doc");  
+      notNull(tag,"tag");  
+      notNull(tag,"attr");  
+      String tagValue = tagValue(doc, tag);
 
         if (tagValue == null) {
             return null;

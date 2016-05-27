@@ -64,11 +64,12 @@ public class AntDocMacrodef extends AntDoc {
                 att.setComment(null);
             }
             if (XpathHelper.get("@default", attnode).length > 0) {
-                att.setDefaultValue("Default is " + XpathHelper.getAttributeValue("default", attnode));
-                att.setRequired(false);
+                String s = XpathHelper.getAttributeValue("default", attnode);
+                att.setDefaultValue(s);
+                att.setNotRequiredComment("Default is " + s);
             } else {
                 att.setDefaultValue(null);
-                att.setRequired(true);
+                att.setRequiredComment("");
             }
             att.setRequiredComment("");
             ret.attributes.put(name, att);
@@ -94,7 +95,8 @@ public class AntDocMacrodef extends AntDoc {
 
     @Override
     public String getAttributeNotRequired(String attributeName) {
-        return attributes.get(attributeName).getDefaultValue();
+        String s = attributes.get(attributeName).getDefaultValue();
+        return (s == null) ? null : "Default is " + s;
     }
 
     @Override
@@ -175,5 +177,10 @@ public class AntDocMacrodef extends AntDoc {
     @Override
     public boolean supportsCharacters() {
         return false;
+    }
+
+    @Override
+    public AntDoc getElementDoc(String elementName) {
+        throw new UnsupportedOperationException("Not supported");
     }
 }

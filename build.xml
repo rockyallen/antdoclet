@@ -195,13 +195,15 @@
             <pathelement location="templates/apache" />
         </path>
 
-        <run-example example="lib-xml"/>
+        <!-- run-example example="apache" src="../apache-ant-1.9.7/src/main"/-->
 
-        <run-example example="asciidoc"/>
+        <run-example example="lib-xml" src="testdata/java"/>
 
-        <run-example example="latex"/>
+        <run-example example="asciidoc" src="testdata/java"/>
 
-        <run-example example="html"/>
+        <run-example example="latex" src="testdata/java"/>
+
+        <run-example example="html" src="testdata/java"/>
 
         <copy todir="output/html">
             <fileset dir="${basedir}/templates/html">
@@ -210,7 +212,7 @@
             </fileset>
         </copy>
 
-        <run-example example="html-with-nested-types"/>
+        <run-example example="html-with-nested-types" src="testdata/java"/>
 
         <copy todir="output/html-with-nested-types">
             <fileset dir="${basedir}/templates/html">
@@ -223,15 +225,16 @@
 
     <macrodef name="run-example">
         <attribute name="example"/>
+        <attribute name="src"/>
         <sequential>
             
             <echo>Running example @{example}...</echo>
             <javadoc 
                 access="public" 
-                sourcepath="testdata/java" 
+                sourcepath="@{src}" 
                 destdir="output/@{example}"
                 docletpathref="docletpath"
-                packagenames="demo.*" 
+                packagenames="*" 
                 source="1.8">
 
                 <doclet name="com.neuroning.antdoclet.AntDoclet">
@@ -284,6 +287,39 @@
             </fileset>
             <report format="frames" todir="build/test/report"/>
         </junitreport>    
+    </target>
+    
+    <target name="apache">
+
+        <path id="dcp">
+            <path refid="run.classpath" />
+            <fileset dir="${user.home}/apache-ant-1.9.7/lib">
+                <include name="*.jar"/>
+            </fileset>
+            <pathelement path="${basedir}/build/antdoclet.jar" />
+        </path>
+
+        <javadoc 
+            access="public" 
+            sourcepath="${user.home}/apache-ant-1.9.7/src/main" 
+            destdir="build/apache"
+            packagenames="org.apache.tools.ant.taskdefs,org.apache.tools.ant.types" 
+            docletpathref="dcp"
+            source="1.6">
+            
+            <doclet name="com.neuroning.antdoclet.AntDoclet">
+                <param name="-doctitle" value="Ant User Manual"/>
+                <param name="-templatesdir" value="${basedir}/templates/apache/html"/>
+                <param name="-templates" value="main.vm"/>
+            </doclet>   
+        </javadoc>    
+        
+        <copy todir="build/apache">
+            <fileset dir="templates/apache/html">
+                <include name="*.html"/>
+                <include name="*.css"/>
+            </fileset>
+        </copy> 
     </target>
 </project>
 

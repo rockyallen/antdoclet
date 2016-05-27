@@ -90,7 +90,7 @@
                     <strong>&lt;$element&gt;</strong>
 
     #if ( ! $elementDoc.sourceIncluded() )
-                    (Of type ${elementDoc.getAntName()} )
+                    (Of type $elementDoc.getAntName() )
     #end
   #end
 			</h4>

@@ -8,7 +8,6 @@
             <file>file:/home/rocky/antdoclet/src/java/com/neuroning/antdoclet/AntDocJavadoc.java</file>
             <file>file:/home/rocky/antdoclet/templates/html-with-nested-types/overview.vm</file>
             <file>file:/home/rocky/antdoclet/templates/html/overview.vm</file>
-            <file>file:/home/rocky/antdoclet/output/lib-xml/lib.xml</file>
             <file>file:/home/rocky/antdoclet/build.xml</file>
         </group>
     </open-files>

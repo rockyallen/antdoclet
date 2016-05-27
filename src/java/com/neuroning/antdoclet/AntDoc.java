@@ -47,6 +47,7 @@ public abstract class AntDoc implements Comparable<AntDoc> {
      */
     public abstract String getAntName();
 
+    public abstract AntDoc getElementDoc(String elementName);
     /**
      * Retrieves the method comment for the given attribute. The comment of the
      * setter is used preferably to the getter comment.

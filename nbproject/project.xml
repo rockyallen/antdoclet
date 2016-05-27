@@ -54,7 +54,7 @@ auxiliary.show.customizer.message=<message>
                     <target>build</target>
                 </action>
                 <action name="run">
-                    <target>run</target>
+                    <target>apache</target>
                 </action>
             </ide-actions>
             <view>

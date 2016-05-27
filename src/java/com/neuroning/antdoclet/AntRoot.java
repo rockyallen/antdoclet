@@ -56,15 +56,14 @@ public class AntRoot {
     private final SortedSet<AntDoc> allTasks;
     private final SortedSet<String> categories;
 
-    public AntRoot()
-    {
+    public AntRoot() {
         all = new TreeSet<AntDoc>();
         allTypes = new TreeSet<AntDoc>();
         allTasks = new TreeSet<AntDoc>();
         categories = new TreeSet<String>();
     }
 
-        public void load(RootDoc rootDoc) throws Exception {
+    public void load(RootDoc rootDoc) throws Exception {
 
         // ALL classes and interfaces
         ClassDoc[] classes = rootDoc.classes();
@@ -75,7 +74,6 @@ public class AntRoot {
                 if (d.getAntCategory() != null) {
                     categories.add(d.getAntCategory());
                 }
-
                 if (d.isTask()) {
                     allTasks.add(d);
                 } else {
@@ -147,7 +145,8 @@ public class AntRoot {
     }
 
     /**
-     * Read macrodefs from f, convert them to AntDocs and add them to the appropriate AntDoc lists.
+     * Read macrodefs from f, convert them to AntDocs and add them to the
+     * appropriate AntDoc lists.
      *
      * @param f
      * @throws FileNotFoundException
