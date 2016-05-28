@@ -21,7 +21,7 @@
 package demo;
 
 /**
- * Eg knife, fork, spoon
+ * Base class for an extension type.
  * 
  * @ant.type category="dayout"
  * 
@@ -29,7 +29,12 @@ package demo;
  */
 public abstract class EatingImplement {
     
-    public abstract String type();
+  /**
+   * What is this item of cutlery for?
+   * 
+   * @return 
+   */
+    public abstract String usedFor();
     
     
 }

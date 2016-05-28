@@ -166,7 +166,7 @@ Tasks.
           <unzip src="${dist.target}.zip" dest="build/temp"/>
         </target>
 
-        <target name="run1" description="Run over Ant source">
+        <target name="apache-1-6" description="Run over Ant source">
 
           <ant dir="build/temp/${dist.name}" antfile="example.build.xml" target="build">
             <property name="source.dir" location="${user.home}/apache-ant-1.6.0-src/src/main"/>
@@ -178,7 +178,7 @@ Tasks.
           
         </target>
 
-        <target name="run2" description="Run over latest Ant source">
+        <target name="apache-1-9" description="Run over latest Ant source">
 
           <ant dir="build/temp/${dist.name}" antfile="example.build.xml" target="build">
             <property name="source.dir" location="${user.home}/apache-ant-1.9.7/src/main"/>
@@ -189,7 +189,7 @@ Tasks.
           </ant>
         </target>
         
-        <target name="run3" description="Run over sample source">
+        <target name="picnic" description="Run over sample source">
           
           <mkdir dir="build/testclasses"/>
           
