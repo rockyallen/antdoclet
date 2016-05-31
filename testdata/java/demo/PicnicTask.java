@@ -142,7 +142,7 @@ public class PicnicTask extends Task {
   /**
    * A game to take.
    * 
-   * Sample nested class, implemented as an inner class.
+   * Sample nested element, implemented as an inner class.
    * 
    * @Ant.type category="dayout"
    */

@@ -21,7 +21,8 @@
 package demo;
 
 /**
- * Something to sit on
+ * Something to sit on.
+ * Sample nested element, implemented as a concrete class.
  * 
  * @ant.type  category="dayout"
  * @author rocky
