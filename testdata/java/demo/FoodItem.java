@@ -7,13 +7,6 @@ package demo;
 
 public interface FoodItem {
   
-//   /**
-//   * How much do you want?
-//   * 
-//   * @ant.required
-//   */
-//  void setQuantity(int qty);
-  
   /**
    * How fat will it make me?
    * 
