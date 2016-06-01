@@ -70,7 +70,8 @@
 #if ($taskDoc.supportsCharacters())
 			<p>This Task accepts text in its element body.</p>
 #end
-
+                </div>
+                
 #foreach ($element in $taskDoc.getNestedElements())
             
   #set($elementDoc = $taskDoc.getElementDoc($element))
@@ -98,6 +99,7 @@
 		    $elementDoc.getComment()
   #end
 
+#if ($elementDoc.getAttributes())
 			<table border="0" cellspacing="2" cellpadding="2" width="100%">
 				<tr>
 	            	<td valign="top" align="left"><b>Attribute</b></td>
@@ -134,8 +136,60 @@
   #end
 			</table>
 #end
-		</div>
+	
     <br />
+#end
+        
+#if ($taskDoc.getNestedTypes())
+<h3>Extension points</h3>
+
+#foreach ($element in $taskDoc.getNestedTypes())            
+<div class="description">
+  <p>$taskDoc.getCommentForType($element)</p>
+</div>
+  
+    #foreach ($nested in $taskDoc.getImplementingClasses($element))            
+      #set($typeDoc = $taskDoc.getTypeDoc($nested))
+        <h4>&lt;$typeDoc.getAntName()&gt; (of class $element)</h4>
+      #if($typeDoc.getComment())
+        $typeDoc.getComment()
+      #end
+      #if ($typeDoc.getAttributes())
+  <table border="0" cellspacing="2" cellpadding="2" width="100%">
+  <tr>
+  <td valign="top" align="left"><b>Attribute</b></td>
+  <td valign="top" align="left"><b>Description</b></td>
+  <td valign="top" align="left"><b>Type</b></td>
+  <td valign="top" align="left"><b>Required</b></td>
+  </tr>
+      #foreach ($elementAttr in $typeDoc.getAttributes())
+
+      <tr>
+        <td>$elementAttr</td>
+        <td>
+          <span>$!typeDoc.getAttributeComment($elementAttr)</span>
+        </td>
+        <td>
+          $typeDoc.getAttributeType($elementAttr)
+        </td>
+        <td>
+
+        #if($typeDoc.getAttributeRequired($elementAttr))
+          <b>Yes</b> $typeDoc.getAttributeRequired($elementAttr)
+        #elseif ( $typeDoc.getAttributeNotRequired($elementAttr) )
+          <b>No</b> $typeDoc.getAttributeNotRequired($elementAttr)
+        #else ?
+      #end
+        </td>
+      </tr>
+    #end
+  </table>
+  #end
+  #end
+  #end
+<br />
+
+#end
 	<hr />
 
 	<div class="copyright"><em>Generated with <a href="http://antdoclet.neuroning.com">AntDoclet</a></em></div>

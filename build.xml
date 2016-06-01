@@ -162,32 +162,24 @@ Tasks.
 
 	</target>
 
-        <target name="install" depends="dist" description="Run over Ant source">
+        <target name="install" depends="dist" description="Unpack into build/temp">
           <unzip src="${dist.target}.zip" dest="build/temp"/>
         </target>
 
-        <target name="apache-1-6" description="Run over Ant source">
-
-          <ant dir="build/temp/${dist.name}" antfile="example.build.xml" target="build">
-            <property name="source.dir" location="${user.home}/apache-ant-1.6.0-src/src/main"/>
-            <property name="jars.dir" location="${user.home}/apache-ant-1.6.0-bin/lib"/>
-            <property name="jver" value="1.6"/>
-            <property name="template" value="html/main.vm"/>
-            <property name="outdir" location="build/apache-1.6"/>
-          </ant>
-          
+        <target name="apache-1-6" description="Run example template over Ant 1.6 source">
+          <antjavadoc 
+            source.dir="${user.home}/apache-ant-1.6.0-src/src/main"
+            jars.dir="${user.home}/apache-ant-1.6.0-bin/lib"
+            jver="1.6"/>          
         </target>
 
-        <target name="apache-1-9" description="Run over latest Ant source">
-
-          <ant dir="build/temp/${dist.name}" antfile="example.build.xml" target="build">
-            <property name="source.dir" location="${user.home}/apache-ant-1.9.7/src/main"/>
-            <property name="jars.dir" location="${user.home}/apache-ant-1.9.7/lib"/>
-            <property name="jver" value="1.8"/>
-            <property name="template" value="html/main.vm"/>
-            <property name="outdir" location="build/apache-1.9.7"/>
-          </ant>
+        <target name="apache-1-9" description="Run example template over Ant 1.9 source">
+          <antjavadoc 
+            source.dir="${user.home}/apache-ant-1.9.7/src/main"
+            jars.dir="${user.home}/apache-ant-1.9.7/lib"
+            jver="1.9"/>
         </target>
+                          
         
         <target name="picnic" description="Run over sample source">
           
@@ -238,6 +230,52 @@ Tasks.
               </doclet>
       </javadoc>        
     </target>
+
+
+
+
+        <macrodef name="antjavadoc" description="Run over ant">
+          
+          <attribute name="jver"/>
+          <attribute name="source.dir"/>
+          <attribute name="jars.dir"/>
+          <sequential>
+          <property name="package.names" value="org.apache.tools.ant.taskdefs,org.apache.tools.ant.types"/>
+          <property name="template" value="html/main.vm"/>
+          <property name="outdir" location="build/@{jver}-html"/>
+          <property name="templates.dir" location="build/temp/${dist.name}/templates/example"/>
+
+          <copy todir="${outdir}" overwrite="true">
+            <fileset dir="${templates.dir}/html/">
+              <exclude name="*.vm"/>
+            </fileset>
+          </copy>
+
+          <path id="doclet.classpath">
+
+          <fileset id="libs" dir="build/temp/${dist.name}">
+            <include name="**/*.jar"/>
+          </fileset>
+
+          <fileset file="${ant.home}/lib/ant.jar"/>
+
+          </path>
+  
+          <javadoc access="public"
+              sourcepath="@{source.dir}"
+              destdir="${outdir}"
+              packagenames="${package.names}"
+              docletpathref="doclet.classpath" 
+              source="${jver}">
+
+              <doclet name="com.neuroning.antdoclet.AntDoclet">
+                      <param name="-doctitle" value="${ant.project.name}" />
+                      <param name="-templatesdir" value="${templates.dir}"/>
+                      <param name="-templates" value="${template}" />
+              </doclet>
+          </javadoc>        
+        </sequential>
+    </macrodef>
 
 </project>
 

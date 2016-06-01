@@ -93,4 +93,22 @@ public class Util {
         return str == null || str.length() <= 0;
       }
 
+      
+    /**
+     * Argument check for methods - not nullable.
+     * 
+     * Typed, so you can use instancevar = notNull(arg,"arg");
+     * 
+     * @param <T>
+     * @param t
+     * @param msg Message for 
+     * @throws NullPointerException if t is null
+     * @return 
+     */
+    public static <T> T notNull(T t, String msg) {
+        if (t == null) {
+            throw new NullPointerException(msg);
+        }
+        return t;
+    }
 }

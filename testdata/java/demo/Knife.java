@@ -1,10 +1,10 @@
 package demo;
 
 /**
- * Example of a nested type that extends the extension type.
  * Knives are used for cutting meat.
- * @ant.type name="Knife" category="EatingImplement"
- * @author rocky
+ * 
+ * @design Example of a nested type that extends the extension type.
+ * @ant.type name="knife" category="cutlery"
  */
 public class Knife extends EatingImplement {
 

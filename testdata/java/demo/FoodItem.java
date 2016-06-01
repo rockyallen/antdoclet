@@ -1,39 +1,26 @@
 package demo;
 /**
- * Example of a extension type that is an interface.
  * 
- * @ant.type name="food" category="fooditem"
- * @author rocky
+ * Example of a extension type that is an interface.
+ * This class is an Ant type, but don't tag it as such - only tag its implementations.
  */
 
 public interface FoodItem {
   
-  /**
-   * What is it called?
-   * Only here to make it appear in the antdoclet output - it should be private to your implementing class.
-   * @ant.required
-   */
-  void setName(String name);
+//   /**
+//   * How much do you want?
+//   * 
+//   * @ant.required
+//   */
+//  void setQuantity(int qty);
   
-  /**
-   * What is it called?
-   * 
-   * @ant.required
-   */
-  String getName();
-  
-  /**
-   * How big is it?
-   * 
-   * @ant.required
-   */
-  double getSize();
-
   /**
    * How fat will it make me?
    * 
    * @ant.required
    */
   double getCalories();
+  
+
   
 }

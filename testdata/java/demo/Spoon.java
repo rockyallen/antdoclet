@@ -1,11 +1,10 @@
 package demo;
 
 /**
- * Example of a nested type that extends an extension base class.
  * Spoons are used for eating soup.
  * 
- * @ant.type name="Spoon" category="EatingImplement"
- * @author rocky
+ * @design Example of a nested type that extends an extension base class.
+ * @ant.type name="spoon" category="cutlery"
  */
 public class Spoon extends EatingImplement {
 

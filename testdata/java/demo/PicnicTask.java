@@ -23,9 +23,9 @@ package demo;
 import org.apache.tools.ant.Task;
 
 /**
- * plan for a day out.
+ * Plan for a day out.
  *
- * A sample task definition demonstrating all elements.
+ * A sample task definition demonstrating nested types.
  *
  * @ant.task name="picnic" ignore="false" category="dayout"
  */
@@ -37,7 +37,6 @@ public class PicnicTask extends Task {
 
   @Override
   public void execute() {
-
   }
 
   /**
@@ -75,49 +74,23 @@ public class PicnicTask extends Task {
   }
 
   /**
-   * Sample nested class.
-   *
-   * Ant calls these nested elements. Their classes are known at compile time.
+   * This comment is never used.
+   * @design Simple nested class.
+   * Ant calls these nested elements.
    *
    * @ant.required
-   * @param t
    */
   public void addConfiguredBlanket(Blanket blanket) {
 
   }
 
   /**
-   * What games shall we take?
-   *
-   * Example of nested class, implemented as an inner class.
-   *
-   * Ant calls these nested elements. Their classes are known at compile time.
-   *
-   * @ant.not-required
-   * @param t
-   */
-  public void addConfiguredGame(Game game) {
-
-  }
-
-  /**
-   * Box to put things in.
-   *
-   * Example of a nested interface. Ant calls these types - you can typedef them
-   * at runtime.
-   *
-   * @ant.not-required
-   * @param basket
-   */
-  public void addConfigured(Basket basket) {
-
-  }
-
-  /**
-   * Eating utensil.
-   *
-   * Example of a nested abstract class. Ant calls these types - you can typedef
-   * them at runtime.
+   * Something to eat with.
+   * (See also the "cutlery" category).
+   * Choose any number from:
+   * 
+   * 
+   * @design Example of a nested abstract class.
    *
    * @ant.not-required
    * @param cutlery
@@ -128,9 +101,9 @@ public class PicnicTask extends Task {
 
   /**
    * Something to eat.
-   *
-   * Example of a nested type as an interface. Ant calls these types - you can
-   * typedef them at runtime.
+   * Choose any number from:
+   * 
+   * @design Example of a nested type as an interface. Ant calls these types.
    *
    * @ant.not-required
    * @param food
@@ -138,30 +111,4 @@ public class PicnicTask extends Task {
   public void addConfigured(FoodItem food) {
 
   }
-
-  /**
-   * A game to take.
-   * 
-   * Sample nested element, implemented as an inner class.
-   * 
-   * @Ant.type category="dayout"
-   */
-  public static class Game {
-
-    private String name;
-
-    /** 
-     * Name of the game.
-     * @ant.required
-     * @param name 
-     */
-    public void setName(String name) {
-      this.name = name;
-    }
-
-    public String getName() {
-      return name;
-    }
-  }
-
 }

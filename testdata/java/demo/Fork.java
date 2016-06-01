@@ -1,10 +1,11 @@
 package demo;
 
 /**
- * Example of a nested type that extends the extension type.
+ * Forks are used for stabbing vegetables.
  * 
- * @ant.type name="fork" category="EatingImplement"
- * @author rocky
+ * @design Example of a nested type that extends the extension type.
+ * 
+ * @ant.type name="fork" category="cutlery"
  */
 public class Fork extends EatingImplement {
 
